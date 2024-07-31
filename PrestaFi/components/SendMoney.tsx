@@ -8,84 +8,128 @@ import { Button } from "@/components/ui/button"
 import { JSX, SVGProps } from "react"
 import { useRouter } from 'next/navigation';
 
+import { useContext } from 'react';
+import { GlobalContext } from '../contexts/GlobalContext';
+
+import {
+  FreighterModule,
+  StellarWalletsKit,
+  WalletNetwork,
+  XBULL_ID, FREIGHTER_ID,
+  xBullModule, 
+  ISupportedWallet,
+} from '@creit.tech/stellar-wallets-kit';
+
+const kit: StellarWalletsKit = new StellarWalletsKit({
+  network: WalletNetwork.TESTNET,
+  selectedWalletId: FREIGHTER_ID,
+  modules: [
+    new FreighterModule(),
+  ]
+});
+
 export default function SendMoneyComponent() {
 
+  const { stellarWalletAddress, setStellarWalletAddress } = useContext(GlobalContext);
   const router = useRouter();
 
   const handlePayCredit = () => {
     router.push('/pay-credit');
   };  
 
+  async function connectToStellar() {
+    await kit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        kit.setWallet(option.id);
+        const publicKey = await kit.getPublicKey();
+        // Do something else
+        setStellarWalletAddress(publicKey);
+        console.log(publicKey);
+      },
+    });  
+  }
 
   return (
-<div className="flex items-center justify-center min-h-screen bg-gray-100">
-<div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6">
-        <DollarSignIcon className="inline-block mr-2 w-6 h-6" />
-        Send Money
-      </h2>
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="amount">You Send</Label>
-          <Input id="amount" placeholder="$300" defaultValue="$300" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="recipient">To This Recipient</Label>
-          <Select>
-            <SelectTrigger id="recipient">
-              <SelectValue placeholder="Mother - GBH4...GIYI" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="mother">Mother - GBH4...GIYI</SelectItem>
-              <SelectItem value="father">Father - GBH4...GIYI</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="payment-method">Your Payment Method</Label>
-          <Select>
-            <SelectTrigger id="payment-method">
-              <SelectValue placeholder="PrestaFI Credit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="prestafi">PrestaFI Credit</SelectItem>
-              <SelectItem value="paypal">PayPal</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Maximum Credit Available</Label>
-            <div className="p-2 text-center bg-gray-100 rounded">$300</div>
+    <>
+    { stellarWalletAddress && (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-center mb-6">
+            <DollarSignIcon className="inline-block mr-2 w-6 h-6" />
+            Send Money
+          </h2>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">You Send</Label>
+              <Input id="amount" placeholder="$300" defaultValue="$300" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="recipient">To This Recipient</Label>
+              <Select>
+                <SelectTrigger id="recipient">
+                  <SelectValue placeholder="Mother - GBH4...GIYI" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mother">Mother - GBH4...GIYI</SelectItem>
+                  <SelectItem value="father">Father - GBH4...GIYI</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="payment-method">Your Payment Method</Label>
+              <Select>
+                <SelectTrigger id="payment-method">
+                  <SelectValue placeholder="PrestaFI Credit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="prestafi">PrestaFI Credit</SelectItem>
+                  <SelectItem value="paypal">PayPal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Maximum Credit Available</Label>
+                <div className="p-2 text-center bg-gray-100 rounded">$300</div>
+              </div>
+              <div className="space-y-2">
+                <Label>Collateral Provided</Label>
+                <div className="p-2 text-center bg-gray-100 rounded">$600 (5,919 XLM)</div>
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p className="font-bold">Credit Conditions & Terms:</p>
+              <p>4 monthly installments ($75). 1% interest per month ($3). For a total of $312. No additional fees.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>They Receive</Label>
+              <Input placeholder="$5,547 MXN" defaultValue="$5,547 MXN" />
+            </div>
+            <div className="text-sm text-center text-muted-foreground">
+              <p className="font-bold">And We Give You These Conditions:</p>
+              <p>$12 as the total fee (interest + transfer fee)</p>
+              <p>19.49 MXN as the exchange rate</p>
+              <p>
+                You will pay just <span className="font-bold">$312</span>, splitted in 4 monthly installments of{" "}
+                <span className="font-bold">$78</span>
+              </p>
+              <p>No additional fees</p>
+            </div>
+            <Button className="w-full bg-[#7c25cc] text-white" onClick={handlePayCredit} >Get Credit & Send Money</Button>
           </div>
-          <div className="space-y-2">
-            <Label>Collateral Provided</Label>
-            <div className="p-2 text-center bg-gray-100 rounded">$600 (5,919 XLM)</div>
-          </div>
         </div>
-        <div className="text-sm text-muted-foreground">
-          <p className="font-bold">Credit Conditions & Terms:</p>
-          <p>4 monthly installments ($75). 1% interest per month ($3). For a total of $312. No additional fees.</p>
-        </div>
-        <div className="space-y-2">
-          <Label>They Receive</Label>
-          <Input placeholder="$5,547 MXN" defaultValue="$5,547 MXN" />
-        </div>
-        <div className="text-sm text-center text-muted-foreground">
-          <p className="font-bold">And We Give You These Conditions:</p>
-          <p>$12 as the total fee (interest + transfer fee)</p>
-          <p>19.49 MXN as the exchange rate</p>
-          <p>
-            You will pay just <span className="font-bold">$312</span>, splitted in 4 monthly installments of{" "}
-            <span className="font-bold">$78</span>
-          </p>
-          <p>No additional fees</p>
-        </div>
-        <Button className="w-full bg-[#7c25cc] text-white" onClick={handlePayCredit} >Get Credit & Send Money</Button>
       </div>
-    </div>
-</div>
-
+    )}
+    { !stellarWalletAddress && (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="max-w-lg mx-auto p-6">
+          <Button className="bg-[#7D4AEA] text-white mr-8  " variant="outline" onClick={connectToStellar}>
+              Connect Wallet
+          </Button>
+        </div>
+      </div>
+    )}
+    </>
 
   )
 }
