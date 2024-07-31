@@ -1,13 +1,50 @@
-
+"use client";
 
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { JSX, SVGProps } from "react"
 
+import { useContext } from 'react';
+import { GlobalContext } from '../contexts/GlobalContext';
+
+import {
+  FreighterModule,
+  StellarWalletsKit,
+  WalletNetwork,
+  XBULL_ID, FREIGHTER_ID,
+  xBullModule, 
+  ISupportedWallet,
+} from '@creit.tech/stellar-wallets-kit';
+
+const kit: StellarWalletsKit = new StellarWalletsKit({
+  network: WalletNetwork.TESTNET,
+  selectedWalletId: FREIGHTER_ID,
+  modules: [
+    new FreighterModule(),
+  ]
+});
+
 export default function PayCreditComponent() {
+
+  const { stellarWalletAddress, setStellarWalletAddress } = useContext(GlobalContext);
+
+  async function connectToStellar() {
+    await kit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        kit.setWallet(option.id);
+        const publicKey = await kit.getPublicKey();
+        // Do something else
+        setStellarWalletAddress(publicKey);
+        console.log(publicKey);
+      },
+    });  
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <>
+    { stellarWalletAddress && (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-bold text-center mb-6">
                 <DollarSignIcon className="inline-block w-6 h-6 mr-1" />
@@ -48,7 +85,19 @@ export default function PayCreditComponent() {
                 <Button className="w-full bg-[#7c25cc]">Pay Credit</Button>
             </div>
         </div>
-    </div>    
+      </div>    
+
+    )}
+    { !stellarWalletAddress && (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="max-w-lg mx-auto p-6">
+          <Button className="bg-[#7D4AEA] text-white mr-8  " variant="outline" onClick={connectToStellar}>
+              Connect Wallet
+          </Button>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 
