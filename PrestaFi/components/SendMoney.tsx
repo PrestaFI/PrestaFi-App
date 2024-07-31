@@ -1,12 +1,22 @@
 
+"use client";
 
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { JSX, SVGProps } from "react"
+import { useRouter } from 'next/navigation';
 
 export default function SendMoneyComponent() {
+
+  const router = useRouter();
+
+  const handlePayCredit = () => {
+    router.push('/pay-credit');
+  };  
+
+
   return (
 <div className="flex items-center justify-center min-h-screen bg-gray-100">
 <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -71,7 +81,7 @@ export default function SendMoneyComponent() {
           </p>
           <p>No additional fees</p>
         </div>
-        <Button className="w-full bg-[#7c25cc] text-white">Get Credit & Send Money</Button>
+        <Button className="w-full bg-[#7c25cc] text-white" onClick={handlePayCredit} >Get Credit & Send Money</Button>
       </div>
     </div>
 </div>
